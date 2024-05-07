@@ -1,8 +1,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-import sys, resources
+import sys, GUI.resources as resources
 from AppManager import Maestro
+from pyqtgraph import PlotWidget
+import socket
+import json
 
-class Ui_MainWindow(object):
+class   (object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1126, 680)
@@ -79,12 +82,52 @@ class Ui_MainWindow(object):
 from pyqtgraph import PlotWidget
 
 
+# Mansy Code
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.ui.searchButton.clicked.connect(self.search_button_clicked)
+
+    def search_button_clicked(self):
+        # Retrieve patient ID entered in the search bar
+        patient_id = self.ui.lineEdit.text()
+
+        # Send patient ID to server for data retrieval
+        data = self.retrieve_patient_data(patient_id)
+
+        # Display retrieved data (replace this with your actual visualization code)
+        print("Retrieved Data:", data)
+
+    def retrieve_patient_data(self, patient_id):
+        # Establish connection to the server and send request for patient data
+        server_address = ('localhost', 8000)
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+                client_socket.connect(server_address)
+                # Send patient ID to server
+                client_socket.sendall(json.dumps({'patient_id': patient_id}).encode())
+                # Receive response from server
+                data = client_socket.recv(1024)
+                return json.loads(data.decode())
+        except Exception as e:
+            print("Error:", e)
+            return None
+
+
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     MainWindow = QtWidgets.QMainWindow()
+#     ui = Ui_MainWindow()
+#     ui.setupUi(MainWindow)
+#     Maestro = Maestro(ui)
+#     MainWindow.show()
+#     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    Maestro = Maestro(ui)
-    MainWindow.show()
+    window = MainWindow()
+    window.show()
     sys.exit(app.exec_())
