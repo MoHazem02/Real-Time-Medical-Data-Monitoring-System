@@ -1,31 +1,26 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-import sys, GUI.resources as resources
-from AppManager import Maestro
+import sys, resources
+from Client import Maestro
 from pyqtgraph import PlotWidget
-import socket
-import json
 
-class   (object):
+class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1126, 680)
         MainWindow.setMinimumSize(QtCore.QSize(1126, 680))
         MainWindow.setMaximumSize(QtCore.QSize(1126, 680))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("Assets/monitor.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("GUI/Assets/monitor.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
-        MainWindow.setStyleSheet("background-color:#3A3B3C;\n"
-"background-image: url(:/images/Assets/bg2.jpg);\n"
-"color: white;\n"
-"")
+        MainWindow.setStyleSheet("background-color:#3A3B3C;\n" "background-image: url(:/images/Assets/bg2.jpg);\n" "color: white;\n" "")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.groupBox = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox.setGeometry(QtCore.QRect(20, 40, 751, 301))
         self.groupBox.setObjectName("groupBox")
-        self.ECG_Graph = PlotWidget(self.groupBox)
-        self.ECG_Graph.setGeometry(QtCore.QRect(10, 20, 731, 271))
-        self.ECG_Graph.setObjectName("ECG_Graph")
+        self.temperature_graph = PlotWidget(self.groupBox)
+        self.temperature_graph.setGeometry(QtCore.QRect(10, 20, 731, 271))
+        self.temperature_graph.setObjectName("temperature_graph")
         self.groupBox_2 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_2.setGeometry(QtCore.QRect(790, 40, 311, 301))
         self.groupBox_2.setObjectName("groupBox_2")
@@ -50,7 +45,7 @@ class   (object):
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
         self.lineEdit.setGeometry(QtCore.QRect(380, 0, 251, 31))
         self.lineEdit.setObjectName("lineEdit")
-        self.commandLinkButton = QtWidgets.QCommandLinkButton(self.centralwidget)
+        self.commandLinkButton = QtWidgets.QCommandLinkButton(self.centralwidget, clicked=lambda: Maestro.search_button_clicked())
         self.commandLinkButton.setGeometry(QtCore.QRect(660, 0, 141, 41))
         self.commandLinkButton.setObjectName("commandLinkButton")
         self.status_ok_label = QtWidgets.QLabel(self.centralwidget)
@@ -77,57 +72,15 @@ class   (object):
         self.groupBox.setTitle(_translate("MainWindow", "Chart"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Temperature"))
         self.label.setText(_translate("MainWindow", "Current Temperature"))
-        self.lineEdit.setPlaceholderText(_translate("MainWindow", "Patient ID"))
+        self.lineEdit.setPlaceholderText(_translate("MainWindow", "Patient ID: 1"))
         self.commandLinkButton.setText(_translate("MainWindow", "Search"))
-from pyqtgraph import PlotWidget
-
-
-# Mansy Code
-class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.ui.searchButton.clicked.connect(self.search_button_clicked)
-
-    def search_button_clicked(self):
-        # Retrieve patient ID entered in the search bar
-        patient_id = self.ui.lineEdit.text()
-
-        # Send patient ID to server for data retrieval
-        data = self.retrieve_patient_data(patient_id)
-
-        # Display retrieved data (replace this with your actual visualization code)
-        print("Retrieved Data:", data)
-
-    def retrieve_patient_data(self, patient_id):
-        # Establish connection to the server and send request for patient data
-        server_address = ('localhost', 8000)
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-                client_socket.connect(server_address)
-                # Send patient ID to server
-                client_socket.sendall(json.dumps({'patient_id': patient_id}).encode())
-                # Receive response from server
-                data = client_socket.recv(1024)
-                return json.loads(data.decode())
-        except Exception as e:
-            print("Error:", e)
-            return None
-
-
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication(sys.argv)
-#     MainWindow = QtWidgets.QMainWindow()
-#     ui = Ui_MainWindow()
-#     ui.setupUi(MainWindow)
-#     Maestro = Maestro(ui)
-#     MainWindow.show()
-#     sys.exit(app.exec_())
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    Maestro = Maestro(ui)
+    MainWindow.show()
     sys.exit(app.exec_())
